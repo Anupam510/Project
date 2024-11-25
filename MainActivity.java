@@ -1,79 +1,115 @@
-package com.example.bmicalculator;
+package com.example.calculatorappexample;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.example.bmicalculator.core.Health;
-
+import com.example.calculatorappexample.R;
+import java.text.DecimalFormat;
 public class MainActivity extends AppCompatActivity {
+    // Declare variables to hold references to UI elements
+    private EditText num1EditText, num2EditText;
+    private TextView resultTextView;
 
-    EditText heightText, weightText;
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        // Initialize UI elements from the layout
+        num1EditText = findViewById(R.id.num1EditText);
+        num2EditText = findViewById(R.id.num2EditText);
+        resultTextView = findViewById(R.id.resultTextView);
+        // Set click listeners for arithmetic operation buttons
+        Button addButton = findViewById(R.id.addButton);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                performCalculation('+');
+            }
         });
-
-        heightText = findViewById(R.id.editTextHeight);
-        weightText = findViewById(R.id.editTextWeight);
+        Button subtractButton = findViewById(R.id.subtractButton);
+        subtractButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                performCalculation('-');
+            }
+        });
+        Button multiplyButton = findViewById(R.id.multiplyButton);
+        multiplyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                performCalculation('*');
+            }
+        });
+        Button divideButton = findViewById(R.id.divideButton);
+        divideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                performCalculation('/');
+            }
+        });
+        Button sqrtButton = findViewById(R.id.sqrtButton);
+        sqrtButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                calculateSquareRoot();
+            }
+        });
     }
 
-    public void onCalculateButtonClick(View view) {
-
-        double height = 0;
-        double weight = 0;
-
-
-        if(!heightText.getText().toString().equals("") && Double.parseDouble(heightText.getText().toString()) != 0){
-            height = Double.parseDouble(heightText.getText().toString());
+    private void performCalculation(char operator) {
+        // Get the values entered in the input fields
+        String num1Str = num1EditText.getText().toString();
+        String num2Str = num2EditText.getText().toString();
+        // Check if either input field is empty
+        if (num1Str.isEmpty() || num2Str.isEmpty()) {
+            Toast.makeText(this, "Please enter both numbers",
+                    Toast.LENGTH_SHORT).show();
+            return; // Exit the method to prevent calculations with empty inputs
         }
-
-        if(!weightText.getText().toString().equals("") && Double.parseDouble(weightText.getText().toString()) != 0){
-            weight = Double.parseDouble(heightText.getText().toString());
-        }
-
-        Health health = new Health();
-        double bmiResult = health.calculateBMI(height, weight);
-
-        String resultText;
-
-        if(bmiResult != -1){
-            String bmiCat = health.determineCategory(bmiResult);
-            resultText = "Your BMI index is " + String.format("%.2f",bmiResult) + "\nBMI category: "+bmiCat;
-
-
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-            alertDialogBuilder.setTitle("BMI");
-            alertDialogBuilder.setMessage(resultText);
-            alertDialogBuilder.setPositiveButton("DONE", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    heightText.setText("");
-                    weightText.setText("");
+        // Convert the input values to numeric format
+        double num1 = Double.parseDouble(num1Str);
+        double num2 = Double.parseDouble(num2Str);
+        double result = 0;
+        // Perform the selected calculation based on the operator
+        switch (operator) {
+            case '+':
+                result = num1 + num2;
+                break;
+            case '-':
+                result = num1 - num2;
+                break;
+            case '*':
+                result = num1 * num2;
+                break;
+            case '/':
+                if (num2 != 0) {
+                    result = num1 / num2;
+                } else {
+                    Toast.makeText(this, "Cannot divide by zero",
+                            Toast.LENGTH_SHORT).show();
+                    return; // Exit the method if division by zero is attempted;
                 }
-            });
-
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
-
-        }else{
-            Toast.makeText(this, health.getErrorMessage(),Toast.LENGTH_SHORT).show();
+                break;
         }
+        // Format and display the calculation result
+        DecimalFormat df = new DecimalFormat("#.##");
+        resultTextView.setText("Result: " + df.format(result));
+    }
+
+    private void calculateSquareRoot() {
+        String num1Str = num1EditText.getText().toString();
+        // Check if the input field is empty
+        if (num1Str.isEmpty()) {
+            Toast.makeText(this, "Please enter a number",
+                    Toast.LENGTH_SHORT).show();
+            return; // Exit the method to prevent calculations with empty inputs
+        }
+        double num = Double.parseDouble(num1Str);
+        double sqrtResult = Math.sqrt(num);
+        DecimalFormat df = new DecimalFormat("#.##");
+        resultTextView.setText("Square Root: " + df.format(sqrtResult));
     }
 }
